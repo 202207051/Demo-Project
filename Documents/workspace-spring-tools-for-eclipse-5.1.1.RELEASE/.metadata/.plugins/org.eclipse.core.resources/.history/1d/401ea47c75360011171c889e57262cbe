@@ -1,0 +1,59 @@
+package com.springboot.rocky.service;
+
+import com.springboot.rocky.config.AppConfig;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import java.io.*;
+import java.util.concurrent.TimeUnit;
+
+@Service
+@RequiredArgsConstructor
+public class DockerService {
+
+    private final FileService fileService;
+
+    public String run(String userId, String language, String code) {
+        try {
+            // 1. 소스 파일 저장
+            fileService.saveCode(userId, language, code);
+
+            // 2. 도커 명령어 구성 (이중 볼륨 마운트)
+            String userHostPath = AppConfig.HOST_WORK_DIR + "/" + userId;
+            
+            String[] command = {
+                "docker", "run", "--rm",
+                "--memory", "128m",
+                "--cpus", ".5",
+                "-v", userHostPath + ":" + AppConfig.CONTAINER_APP_DIR,       // 개인 영역
+                "-v", AppConfig.HOST_SHARE_DIR + ":" + AppConfig.CONTAINER_SHARE_DIR, // 상호교류 영역
+                "rocky-build-" + language.toLowerCase() // 미리 빌드된 이미지 사용
+            };
+
+            // 3. 프로세스 실행
+            ProcessBuilder pb = new ProcessBuilder(command);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+
+            // 4. 결과 읽기
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                }
+            }
+
+            // 5. 타임아웃 처리 (10초)
+            if (!process.waitFor(10, TimeUnit.SECONDS)) {
+                process.destroyForcibly();
+                return "Error: Execution Timeout (10s)";
+            }
+
+            return output.toString().trim();
+
+        } catch (Exception e) {
+            return "Server Error: " + e.getMessage();
+        }
+    }
+}
+

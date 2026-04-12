@@ -1,0 +1,14 @@
+package com.springboot.rocky.config;
+
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AppConfig {
+    // 메인 OS(Rocky Linux) 경로
+    public static final String HOST_WORK_DIR = "/opt/rocky-build/work";
+    public static final String HOST_SHARE_DIR = "/opt/rocky-build/share";
+
+    // 컨테이너 내부 경로
+    public static final String CONTAINER_APP_DIR = "/app";
+    public static final String CONTAINER_SHARE_DIR = "/app/share";
+}
