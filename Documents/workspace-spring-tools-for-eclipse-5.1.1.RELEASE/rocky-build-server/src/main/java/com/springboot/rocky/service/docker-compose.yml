@@ -1,0 +1,24 @@
+# Docker Compose V5에서는 version 생략 가능하지만, 명시해도 무방합니다.
+version: '3.8'
+
+services:
+  rocky-app:
+    build: .
+    container_name: rocky-compiler-server
+    ports:
+      - "8080:8080"
+    volumes:
+      # 1. FileService.java에서 사용하는 호스트 작업 경로 마운트
+      - /opt/rocky-build/work:/opt/rocky-build/work
+      # 2. AppConfig.java의 공용 공유 경로 마운트
+      - /opt/rocky-build/share:/opt/rocky-build/share
+      # 3. DockerService.java가 호스트의 도커를 제어하기 위한 소켓 마운트 (DooD)
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=Asia/Seoul
+    restart: always
+
+# 필요한 경우 네트워크 설정을 추가하여 보안을 강화할 수 있습니다.
+networks:
+  default:
+    driver: bridge
