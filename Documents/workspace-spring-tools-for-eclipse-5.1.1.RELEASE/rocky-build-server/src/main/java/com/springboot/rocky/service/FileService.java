@@ -11,30 +11,23 @@ import java.nio.file.Paths;
 @Service
 public class FileService {
 
-    /**
-     * 사용자의 코드를 물리 파일로 저장합니다.
-     */
-    public Path saveCode(String userId, String language, String code) throws IOException {
-        // 1. 사용자별 작업 디렉토리 설정 (/opt/rocky-build/work/{userId})
-        Path userWorkPath = Paths.get(AppConfig.HOST_WORK_DIR, userId);
-        
-        // 2. 디렉토리가 없으면 생성 (부모 디렉토리까지 한꺼번에 생성)
-        if (!Files.exists(userWorkPath)) {
-            Files.createDirectories(userWorkPath);
-        }
+	public Path saveCode(String userId, String language, String code) throws IOException {
+		Path userWorkPath = Paths.get(AppConfig.HOST_WORK_DIR, userId);
 
-        // 3. 언어별 파일명 결정 (switch expression 활용)
-        String fileName = switch (language.toLowerCase()) {
-            case "cpp" -> "main.cpp";
-            case "java" -> "Main.java";
-            case "python" -> "script.py";
-            default -> "code.txt";
-        };
+		if (!Files.exists(userWorkPath)) {
+			Files.createDirectories(userWorkPath);
+		}
 
-        // 4. 파일 쓰기
-        Path filePath = userWorkPath.resolve(fileName);
-        Files.writeString(filePath, code);
-        
-        return filePath;
-    }
+		String fileName = switch (language.toLowerCase()) {
+		case "cpp" -> "main.cpp";
+		case "java" -> "Main.java";
+		case "python" -> "script.py";
+		default -> "code.txt";
+		};
+
+		Path filePath = userWorkPath.resolve(fileName);
+		Files.writeString(filePath, code);
+
+		return filePath;
+	}
 }
