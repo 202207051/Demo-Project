@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+    rocky-app:
+        build: .
+        container_name: rocky-compiler-server
+        ports:
+            - "8080:8080"
+        volumes:
+            - /opt/rocky-build/work:/opt/rocky-build/work
+            - /opt/rocky-build/share:/opt/rocky-build/share
+            - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+            - TZ=Asia/Seoul
+        restart: always
+
+networks:
+    default:
+        driver: bridge
