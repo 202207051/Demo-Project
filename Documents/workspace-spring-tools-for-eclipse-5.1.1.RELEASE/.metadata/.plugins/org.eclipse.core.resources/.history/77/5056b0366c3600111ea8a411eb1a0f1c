@@ -1,5 +1,0 @@
-package com.springboot.rocky.config;
-
-public class WebConfig {
-
-}
